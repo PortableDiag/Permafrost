@@ -37,6 +37,12 @@
             android:parentActivityName=".ui.MainActivity" />
 
         <activity
+            android:name=".ui.AppPickerActivity"
+            android:exported="false"
+            android:label="@string/pick_title"
+            android:parentActivityName=".ui.MainActivity" />
+
+        <activity
             android:name=".ui.AppDetailActivity"
             android:exported="false"
             android:parentActivityName=".ui.MainActivity" />

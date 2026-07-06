@@ -48,6 +48,7 @@ public class AppDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_detail);
+        SystemBars.pad(findViewById(R.id.root));
 
         pkg = getIntent().getStringExtra(EXTRA_PKG);
         app = pkg == null ? null : Store.get(this).get(pkg);

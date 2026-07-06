@@ -35,6 +35,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SystemBars.pad(findViewById(R.id.root));
+
+        // Prompt for root up front so the su dialog appears at launch, not on
+        // the first freeze. Runs off the UI thread; the result is cached.
+        new Thread(() -> {
+            boolean ok = Root.isAvailable();
+            if (!ok) {
+                runOnUiThread(() -> android.widget.Toast.makeText(
+                        this, R.string.err_no_root, android.widget.Toast.LENGTH_LONG).show());
+            }
+        }).start();
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
