@@ -1,0 +1,9 @@
+<resources>
+    <color name="frost_primary">#1E88E5</color>
+    <color name="frost_primary_dark">#1565C0</color>
+    <color name="frost_accent">#4FC3F7</color>
+    <color name="frost_ice">#E1F5FE</color>
+    <color name="ic_launcher_background">#0D47A1</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">Permafrost</string>
+    <string name="settings">Settings</string>
+
+    <!-- Errors -->
+    <string name="err_no_root">Root access is required and was not granted.</string>
+    <string name="err_wake">Couldn\'t wake app: %1$s</string>
+
+    <!-- Modes -->
+    <string name="mode_freeze">Freeze</string>
+    <string name="mode_ghost">Ghost</string>
+    <string name="mode_freeze_long">Freeze (disable, keeps data)</string>
+    <string name="mode_ghost_long">Ghost (uninstall, restore on launch)</string>
+
+    <!-- States -->
+    <string name="state_frozen">Frozen</string>
+    <string name="state_ghosted">Ghosted</string>
+    <string name="state_awake">Awake</string>
+    <string name="state_update_unlocked">Unlocked for update</string>
+
+    <!-- Actions -->
+    <string name="action_wake">Wake now</string>
+    <string name="action_freeze_now">Freeze now</string>
+    <string name="action_launch">Launch now</string>
+    <string name="action_add_shortcut">Add frost icon to home screen</string>
+    <string name="action_unlock_update">Unlock for update</string>
+    <string name="action_relock">Re-freeze now</string>
+    <string name="action_remove">Remove from Permafrost</string>
+    <string name="remove_confirm">This wakes the app, restores it to normal, and stops managing it. Continue?</string>
+
+    <!-- Main / empty / banner -->
+    <string name="empty_state">No apps yet.\nTap the + button to freeze one.</string>
+    <string name="perm_banner_title">Usage access needed</string>
+    <string name="perm_banner_text">Permafrost needs Usage access to notice when you leave an app so it can re-freeze it.</string>
+    <string name="grant">Grant</string>
+    <string name="add_app">Freeze app</string>
+
+    <!-- Picker -->
+    <string name="pick_title">Choose apps to freeze</string>
+    <string name="pick_add">Freeze selected</string>
+
+    <!-- Shortcut -->
+    <string name="shortcut_requested">Frost icon added.</string>
+    <string name="shortcut_unsupported">This launcher doesn\'t support pinned icons.</string>
+
+    <!-- Watcher -->
+    <string name="watcher_channel">Re-freeze watcher</string>
+    <plurals name="watching_apps">
+        <item quantity="one">Watching %d app to re-freeze on exit</item>
+        <item quantity="other">Watching %d apps to re-freeze on exit</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="settings_behaviour">Behaviour</string>
+    <string name="settings_default_method">Default method for new apps</string>
+    <string name="settings_refreeze_delay">Re-freeze delay (seconds)</string>
+    <string name="settings_refreeze_delay_sum">How long to wait after you leave an app before re-freezing it.</string>
+    <string name="settings_status">Status</string>
+    <string name="settings_usage_access">Usage access</string>
+    <string name="settings_root">Root access</string>
+    <string name="root_available">Granted</string>
+    <string name="root_missing">Not available — Permafrost needs root.</string>
+    <string name="granted">Granted</string>
+    <string name="not_granted">Not granted — tap to open settings</string>
+
+    <string name="detail_mode_label">Method</string>
+</resources>
