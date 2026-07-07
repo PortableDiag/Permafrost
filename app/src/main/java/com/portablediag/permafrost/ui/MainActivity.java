@@ -1,12 +1,16 @@
 package com.portablediag.permafrost.ui;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +20,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.portablediag.permafrost.R;
+import com.portablediag.permafrost.core.CrashHandler;
 import com.portablediag.permafrost.core.ForegroundApps;
 import com.portablediag.permafrost.core.Root;
 import com.portablediag.permafrost.model.ManagedApp;
@@ -68,6 +73,34 @@ public class MainActivity extends AppCompatActivity {
         MaterialButton grant = findViewById(R.id.banner_action);
         grant.setOnClickListener(v ->
                 startActivity(ForegroundApps.usageAccessSettings()));
+
+        showPendingCrash();
+    }
+
+    /** If the app crashed last run, show the captured report once (copy/share). */
+    private void showPendingCrash() {
+        final String report = CrashHandler.consumeLatest(this);
+        if (report == null) return;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.crash_title)
+                .setMessage(report)
+                .setPositiveButton(R.string.crash_share, (d, w) -> {
+                    Intent s = new Intent(Intent.ACTION_SEND)
+                            .setType("text/plain")
+                            .putExtra(Intent.EXTRA_SUBJECT, "Permafrost crash report")
+                            .putExtra(Intent.EXTRA_TEXT, report);
+                    startActivity(Intent.createChooser(s, getString(R.string.crash_share)));
+                })
+                .setNeutralButton(R.string.crash_copy, (d, w) -> {
+                    ClipboardManager cm =
+                            (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (cm != null) {
+                        cm.setPrimaryClip(ClipData.newPlainText("Permafrost crash", report));
+                        Toast.makeText(this, R.string.crash_copied, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(R.string.crash_dismiss, null)
+                .show();
     }
 
     @Override

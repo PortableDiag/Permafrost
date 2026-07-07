@@ -64,4 +64,11 @@
     <string name="not_granted">Not granted — tap to open settings</string>
 
     <string name="detail_mode_label">Method</string>
+
+    <!-- Crash reporter -->
+    <string name="crash_title">Permafrost crashed last time</string>
+    <string name="crash_share">Share</string>
+    <string name="crash_copy">Copy</string>
+    <string name="crash_dismiss">Dismiss</string>
+    <string name="crash_copied">Crash report copied.</string>
 </resources>

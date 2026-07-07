@@ -69,6 +69,12 @@ ui/      MainActivity, AppPickerActivity, AppDetailActivity, SettingsActivity
 ProxyActivity   the tap target behind every frost icon
 ```
 
+## Troubleshooting
+
+If the app ever crashes, a report is saved to
+`Android/data/com.portablediag.permafrost/files/crashes/` and shown in a dialog
+(with copy/share) the next time you open Permafrost.
+
 ## Caveats
 
 - Root only. No device-owner / no-root path yet.
