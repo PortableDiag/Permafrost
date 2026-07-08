@@ -21,6 +21,11 @@ from disk between uses. Advanced option.
 
 Pick a default in **Settings**; override it per app on each app's detail screen.
 
+Both the home list of managed apps and the picker (where you choose apps to
+freeze) are **searchable** — filter live by app name or package. In the picker,
+ticked apps stay selected while you search, so you can build a set across several
+searches before freezing.
+
 ## How a frost icon works
 
 1. Tap the frosted home-screen icon (the original icon, cooled and snowflake-badged).
