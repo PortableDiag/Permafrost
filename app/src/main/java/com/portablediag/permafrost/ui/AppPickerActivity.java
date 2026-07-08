@@ -3,6 +3,8 @@ package com.portablediag.permafrost.ui;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.portablediag.permafrost.R;
 import com.portablediag.permafrost.core.Manager;
 import com.portablediag.permafrost.core.Root;
@@ -47,6 +50,20 @@ public class AppPickerActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         adapter = new PickerAdapter(this);
         list.setAdapter(adapter);
+
+        TextInputEditText search = findViewById(R.id.search);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
 
         loadApps();
 

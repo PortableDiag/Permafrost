@@ -27,7 +27,9 @@ class ManagedAppAdapter extends RecyclerView.Adapter<ManagedAppAdapter.VH> {
 
     private final Context ctx;
     private final OnClick onClick;
+    private final List<ManagedApp> full = new ArrayList<>();
     private final List<ManagedApp> items = new ArrayList<>();
+    private String query = "";
 
     ManagedAppAdapter(Context ctx, OnClick onClick) {
         this.ctx = ctx;
@@ -35,8 +37,30 @@ class ManagedAppAdapter extends RecyclerView.Adapter<ManagedAppAdapter.VH> {
     }
 
     void submit(List<ManagedApp> apps) {
+        full.clear();
+        full.addAll(apps);
+        applyFilter();
+    }
+
+    /** Narrow the visible list to apps whose label or package matches the query. */
+    void filter(String q) {
+        query = q == null ? "" : q.trim().toLowerCase();
+        applyFilter();
+    }
+
+    private void applyFilter() {
         items.clear();
-        items.addAll(apps);
+        if (query.isEmpty()) {
+            items.addAll(full);
+        } else {
+            for (ManagedApp a : full) {
+                String label = a.label != null ? a.label : a.packageName;
+                if (label.toLowerCase().contains(query)
+                        || a.packageName.toLowerCase().contains(query)) {
+                    items.add(a);
+                }
+            }
+        }
         notifyDataSetChanged();
     }
 

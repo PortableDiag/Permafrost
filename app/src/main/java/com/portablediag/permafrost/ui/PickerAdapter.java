@@ -22,17 +22,42 @@ import java.util.Set;
 class PickerAdapter extends RecyclerView.Adapter<PickerAdapter.VH> {
 
     private final Context ctx;
+    private final List<InstalledApps.Entry> full = new ArrayList<>();
     private final List<InstalledApps.Entry> items = new ArrayList<>();
     private final Set<String> checked = new LinkedHashSet<>();
+    private String query = "";
 
     PickerAdapter(Context ctx) {
         this.ctx = ctx;
     }
 
     void submit(List<InstalledApps.Entry> apps) {
-        items.clear();
-        items.addAll(apps);
+        full.clear();
+        full.addAll(apps);
         checked.clear();
+        applyFilter();
+    }
+
+    /** Narrow the visible list to apps whose label or package matches the query.
+     *  Selections (checked) are keyed by package, so they survive filtering. */
+    void filter(String q) {
+        query = q == null ? "" : q.trim().toLowerCase();
+        applyFilter();
+    }
+
+    private void applyFilter() {
+        items.clear();
+        if (query.isEmpty()) {
+            items.addAll(full);
+        } else {
+            for (InstalledApps.Entry e : full) {
+                String label = e.label != null ? e.label : e.pkg;
+                if (label.toLowerCase().contains(query)
+                        || e.pkg.toLowerCase().contains(query)) {
+                    items.add(e);
+                }
+            }
+        }
         notifyDataSetChanged();
     }
 
