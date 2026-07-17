@@ -44,6 +44,7 @@
     <!-- Shortcut -->
     <string name="shortcut_requested">Frost icon added.</string>
     <string name="shortcut_unsupported">This launcher doesn\'t support pinned icons.</string>
+    <string name="shortcut_disabled">No longer managed by Permafrost.</string>
 
     <!-- Watcher -->
     <string name="watcher_channel">Re-freeze watcher</string>

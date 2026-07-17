@@ -235,6 +235,7 @@ public class AppDetailActivity extends AppCompatActivity {
                 Manager.wake(this, app);
             }
             Ghost.deleteBackup(this, pkg);
+            if (app.hasShortcut) Shortcuts.unpin(this, pkg);
             Store.get(this).remove(pkg);
             return null;
         }, "Remove failed: %s");

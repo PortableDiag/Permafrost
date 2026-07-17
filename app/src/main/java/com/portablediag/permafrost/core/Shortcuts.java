@@ -6,8 +6,12 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 
 import com.portablediag.permafrost.ProxyActivity;
+import com.portablediag.permafrost.R;
+
+import java.util.Collections;
 
 /**
  * Places a "frost icon" on the home screen: a pinned launcher shortcut whose
@@ -51,5 +55,26 @@ public class Shortcuts {
         if (icon != null) b.setIcon(icon);
 
         return sm.requestPinShortcut(b.build(), null);
+    }
+
+    /**
+     * Remove the frost shortcut for {@code pkg} from the home screen.
+     *
+     * <p>Android does not let an app pull a pinned shortcut out of a launcher's
+     * grid directly, so we {@link ShortcutManager#disableShortcuts disable} it:
+     * the icon becomes non-launchable and greyed, most launchers then drop it on
+     * their own, and any stale tap shows a short explanation instead of silently
+     * launching the (now unmanaged) app. On API 30+ we also request removal of
+     * the long-lived pin for launchers that honour it.
+     */
+    public static void unpin(Context ctx, String pkg) {
+        ShortcutManager sm = ctx.getSystemService(ShortcutManager.class);
+        if (sm == null) return;
+
+        java.util.List<String> ids = Collections.singletonList("frost_" + pkg);
+        sm.disableShortcuts(ids, ctx.getString(R.string.shortcut_disabled));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            sm.removeLongLivedShortcuts(ids);
+        }
     }
 }

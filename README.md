@@ -33,6 +33,12 @@ searches before freezing.
 3. `WatcherService` polls the foreground app via **Usage Access**; once you leave
    the target for the configured delay, it re-freezes (or re-ghosts) it.
 
+Removing an app from Permafrost thaws it and disables its frost icon via
+`Shortcuts.unpin`. Android won't let an app pull a pinned shortcut out of a
+launcher's grid, so the icon is disabled rather than deleted — most launchers
+then drop it on their own, and a stale tap shows a short "no longer managed"
+message instead of launching the now-unmanaged app.
+
 ## Updating a frozen app
 
 On the app's detail screen, **Unlock for update** thaws it and suppresses
