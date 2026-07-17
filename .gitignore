@@ -4,3 +4,8 @@
 /build/
 /app/build/
 .idea/
+
+# Signing material — never commit
+keystore.properties
+*.jks
+*.keystore
