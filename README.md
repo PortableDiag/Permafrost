@@ -19,6 +19,19 @@ it reinstalls and restores. Slower per launch and more fragile (data restore
 fixes ownership + SELinux labels for the new uid), but the app is fully gone
 from disk between uses. Advanced option.
 
+> **Read this before using Ghost mode.**
+>
+> - **The backup is taken once**, the first time the app goes dormant. Anything
+>   the app writes afterwards is discarded when it is re-ghosted, and the next
+>   launch restores that original snapshot. Ghost mode is currently suitable for
+>   apps you want to be stateless, not ones you want to keep state in.
+> - **The backup is the only copy.** A ghosted app has been uninstalled, so its
+>   APK and data exist nowhere but Permafrost's own private storage. Clearing
+>   Permafrost's data, or uninstalling Permafrost, destroys every ghosted app
+>   irrecoverably. Thaw your apps before removing Permafrost.
+>
+> Use **Freeze** unless you specifically need the app to be absent from disk.
+
 Pick a default in **Settings**; override it per app on each app's detail screen.
 
 Both the home list of managed apps and the picker (where you choose apps to
@@ -50,6 +63,10 @@ auto-refreeze. Update it however you like (Play Store / sideload), then
 - **Root** (`su`) — the freeze/ghost primitives (`pm disable-user`, `pm enable`,
   `pm uninstall`, `pm install`, data `tar`).
 - **Usage access** (`PACKAGE_USAGE_STATS`) — to notice when you leave an app.
+  This is a *special* permission: it can't be requested with a normal dialog, so
+  Permafrost shows a banner linking to the system settings screen. **Without it
+  there is no automatic re-freeze** — apps still wake on tap, they just stay
+  awake — so grant it if re-freezing appears to do nothing.
 - **Query all packages** — to list installable apps.
 - **Foreground service** — the re-freeze watcher.
 
@@ -64,8 +81,11 @@ export ANDROID_HOME=/path/to/android-sdk
 # -> app/build/outputs/apk/release/app-release.apk
 ```
 
-Signing is read from `keystore.properties` (self-signed `permafrost-release.jks`
-included for sideload testing).
+Signing is read from `keystore.properties`, pointing at a keystore in the project
+root. **Neither is in this repository** — both are gitignored, and the release
+`signingConfig` is only applied when `keystore.properties` exists, so a fresh
+clone still builds; it just produces an unsigned release APK. Supply your own
+keystore to sign.
 
 - `minSdk` 26, `targetSdk` 35, package `com.portablediag.permafrost`.
 - No third-party runtime libraries beyond AndroidX + Material 3.
@@ -74,11 +94,18 @@ included for sideload testing).
 
 ```
 core/    Root shell, Freezer (Method A), Ghost (Method B), Manager,
-         WatcherService, ForegroundApps, IconFrost, Shortcuts, BootReceiver
+         WatcherService, ForegroundApps, InstalledApps, IconFrost, Shortcuts,
+         BootReceiver, CrashHandler
 model/   ManagedApp, Mode, Store (JSON in SharedPreferences)
-ui/      MainActivity, AppPickerActivity, AppDetailActivity, SettingsActivity
+ui/      MainActivity, AppPickerActivity, AppDetailActivity, SettingsActivity,
+         SettingsFragment, ManagedAppAdapter, PickerAdapter, SystemBars
 ProxyActivity   the tap target behind every frost icon
+App             installs the crash handler
 ```
+
+The device is the source of truth for dormancy, not the stored flag: every
+action re-checks the real state with `pm list packages -d` (Freeze) or a package
+lookup (Ghost) before acting.
 
 ## Troubleshooting
 
@@ -90,4 +117,11 @@ If the app ever crashes, a report is saved to
 
 - Root only. No device-owner / no-root path yet.
 - Ghost mode reinstalls on every launch (slow); a few apps dislike restored data.
-- Re-freeze has a ~1s detection lag by design (Usage Access polling).
+  See the warning in the Ghost section above — it backs up once, and its backup
+  is the app's only remaining copy.
+- Re-freeze has a ~1s detection lag by design (Usage Access polling), on top of
+  the configured delay.
+- Automatic re-freeze depends entirely on Usage Access; without it, apps wake and
+  stay awake.
+- No automated tests and no CI. Every root operation has to be verified on a real
+  rooted device.
