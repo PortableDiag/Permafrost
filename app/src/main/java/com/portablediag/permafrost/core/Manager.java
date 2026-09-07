@@ -21,11 +21,15 @@ public class Manager {
         Store store = Store.get(ctx);
         String err;
         if (app.mode == Mode.GHOST) {
-            if (!Ghost.hasBackup(ctx, app.packageName)) {
-                err = Ghost.backup(ctx, app.packageName);
-                if (err != null) return err;
-                app.hasBackup = true;
-            }
+            // Re-snapshot on EVERY re-ghost. Backing up only the first time meant
+            // everything the app wrote afterwards was thrown away by the very
+            // uninstall that follows, and the next wake silently restored the
+            // original snapshot instead. Ghost.backup() stages and verifies before
+            // it replaces the previous backup, so a failure here leaves the old
+            // one intact — and we must NOT uninstall on top of a failed backup.
+            err = Ghost.backup(ctx, app.packageName);
+            if (err != null) return err;
+            app.hasBackup = true;
             err = Ghost.uninstall(app.packageName);
         } else {
             err = Freezer.freeze(app.packageName);

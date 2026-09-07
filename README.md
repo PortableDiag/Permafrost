@@ -21,10 +21,15 @@ from disk between uses. Advanced option.
 
 > **Read this before using Ghost mode.**
 >
-> - **The backup is taken once**, the first time the app goes dormant. Anything
->   the app writes afterwards is discarded when it is re-ghosted, and the next
->   launch restores that original snapshot. Ghost mode is currently suitable for
->   apps you want to be stateless, not ones you want to keep state in.
+> - **The backup is refreshed every time** the app goes dormant, as of 1.5.
+>   Before that it was taken once and never again, so everything the app wrote
+>   afterwards was silently discarded. If you used Ghost mode before 1.5, the
+>   stored snapshot is whatever the app looked like the first time you froze it.
+> - **Permafrost refuses to uninstall an app whose data it cannot archive.** If
+>   Ghost mode reports a backup failure, that is the safety net working — the app
+>   is left installed and running. On some devices Permafrost's root shell cannot
+>   read other apps' data directories at all, and Ghost mode simply cannot work
+>   there. Use Freeze mode.
 > - **The backup is the only copy.** A ghosted app has been uninstalled, so its
 >   APK and data exist nowhere but Permafrost's own private storage. Clearing
 >   Permafrost's data, or uninstalling Permafrost, destroys every ghosted app

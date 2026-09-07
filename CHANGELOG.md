@@ -8,6 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
+## [1.5] — 2026-09-06
+
+Ghost mode data safety. **If you use Ghost mode, this release matters.**
+
+### Fixed
+
+- **Ghost mode now re-snapshots the app every time it goes dormant.** It used to
+  back up only the *first* time: everything the app wrote afterwards was thrown
+  away by the very uninstall that followed, and the next wake silently restored
+  the original snapshot. A ghosted messaging app forgot every message read; a
+  ghosted account app forgot you had logged in. Nothing told you.
+- **A failed backup can no longer destroy the backup it was replacing.** The new
+  snapshot is assembled in a staging directory and checked complete before a
+  single rename swaps it in. The previous version wrote straight into the live
+  backup directory after deleting it, leaving a window in which an app that was
+  about to be uninstalled had no good copy anywhere.
+- **Permafrost will no longer uninstall an app whose data it could not capture.**
+  The app's data directory is now located by asking the package manager rather
+  than assuming `/data/data/<package>`, and if that directory exists but cannot
+  be archived, the whole operation fails and the app is left installed and
+  running. Previously the archive step could quietly produce nothing and the
+  uninstall went ahead regardless — which is unrecoverable data loss.
+- **Restoring no longer reports success when it restored nothing.** The data
+  directory is not always visible the instant the reinstall commits, so it is now
+  polled briefly instead of checked once; if a backup contains data that could
+  not be put back, that is an error rather than a silent skip that left you with
+  a factory-fresh app. Hidden files are also cleared before the restore, so stale
+  dotfiles no longer survive and merge into the restored set.
+
+### Known limitation
+
+On at least one device, Permafrost's own root shell cannot read other apps'
+internal data directories at all, even though an `adb` root shell on the same
+device can. **Ghost mode cannot work there**, and as of this release it says so
+by refusing, rather than uninstalling and losing the data. Freeze mode
+(the default, and the recommended one) is unaffected.
+
 ## [1.4] — 2026-09-06
 
 Tagged `v1.4`. Version bumped to `1.4` / versionCode 5.
@@ -150,5 +187,6 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
+[1.5]: https://github.com/PortableDiag/Permafrost/compare/v1.4...v1.5
 [1.4]: https://github.com/PortableDiag/Permafrost/compare/v1.3...v1.4
 [1.3]: https://github.com/PortableDiag/Permafrost/releases/tag/v1.3
