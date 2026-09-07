@@ -8,7 +8,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Pick one or more installed apps to bring under Permafrost's management. */
-public class AppPickerActivity extends AppCompatActivity {
+public class AppPickerActivity extends LockedActivity {
 
     private PickerAdapter adapter;
     private View progress;

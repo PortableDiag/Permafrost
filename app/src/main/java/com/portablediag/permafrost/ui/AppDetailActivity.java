@@ -8,7 +8,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -26,7 +25,7 @@ import com.portablediag.permafrost.model.Mode;
 import com.portablediag.permafrost.model.Store;
 
 /** Manage a single app: mode, dormancy, home icon, update unlock, removal. */
-public class AppDetailActivity extends AppCompatActivity {
+public class AppDetailActivity extends LockedActivity {
 
     public static final String EXTRA_PKG = "pkg";
 

@@ -66,6 +66,17 @@
     <string name="granted">Granted</string>
     <string name="not_granted">Not granted — tap to open settings</string>
 
+    <!-- Security / app lock -->
+    <string name="settings_security">Security</string>
+    <string name="settings_app_lock">Require unlock to open Permafrost</string>
+    <string name="settings_app_lock_biometric">Asks for your fingerprint or face, with your device PIN as a fallback.</string>
+    <string name="settings_app_lock_credential">No biometrics enrolled, so this asks for your device PIN, pattern or password.</string>
+    <string name="settings_app_lock_unavailable">Unavailable — set a screen lock on your device first.</string>
+    <string name="settings_lock_icons">Also lock frost icons</string>
+    <string name="settings_lock_icons_sum">Off by default. When on, tapping a frost icon asks to unlock before the app wakes, so a frozen app can\'t be launched by someone holding your phone.</string>
+    <string name="lock_title">Unlock Permafrost</string>
+    <string name="lock_subtitle">Confirm it\'s you to manage frozen apps.</string>
+
     <string name="detail_mode_label">Method</string>
 
     <!-- Crash reporter -->

@@ -52,6 +52,31 @@ launcher's grid, so the icon is disabled rather than deleted — most launchers
 then drop it on their own, and a stale tap shows a short "no longer managed"
 message instead of launching the now-unmanaged app.
 
+## Locking Permafrost
+
+**Settings → Security → Require unlock to open Permafrost.** Off by default. With
+it on, opening any Permafrost screen asks for your **fingerprint or face** if you
+have one enrolled, and falls back to your **device PIN, pattern or password**
+otherwise. The switch is greyed out until the device has a screen lock set.
+
+- The lock covers the screens that can thaw, re-freeze, un-manage or list your
+  apps — the home list, the picker, an app's detail screen and Settings.
+- **Frost icons are not locked by default.** A frost icon is meant to be a
+  one-tap wake, so out of the box the lock protects the management UI and not
+  the launch. If you'd rather have both, turn on **Also lock frost icons** — a
+  tap then asks to unlock before the app wakes, so a frozen app can't be
+  launched by someone holding your phone. Also off by default, and it does
+  nothing unless the main lock is on.
+- Permafrost re-locks as soon as it has been off screen for a couple of seconds,
+  and while it is locked its window is marked secure, so the managed-app list
+  does not appear in the recent-apps thumbnail. Screenshots of Permafrost are
+  blocked while the setting is on.
+- Cancelling the prompt closes Permafrost rather than dropping you onto the
+  screen underneath.
+- If you later remove your screen lock entirely, Permafrost **opens without a
+  prompt** rather than locking you out of your own app. Re-adding a screen lock
+  restores the lock.
+
 ## Updating a frozen app
 
 On the app's detail screen, **Unlock for update** thaws it and suppresses
@@ -67,6 +92,9 @@ auto-refreeze. Update it however you like (Play Store / sideload), then
   Permafrost shows a banner linking to the system settings screen. **Without it
   there is no automatic re-freeze** — apps still wake on tap, they just stay
   awake — so grant it if re-freezing appears to do nothing.
+- **Biometric** (`USE_BIOMETRIC`) — only for the optional app lock above. Never
+  requested unless you turn that setting on, and it guards nothing but
+  Permafrost's own UI.
 - **Query all packages** — to list installable apps.
 - **Foreground service** — the re-freeze watcher.
 
@@ -88,17 +116,19 @@ clone still builds; it just produces an unsigned release APK. Supply your own
 keystore to sign.
 
 - `minSdk` 26, `targetSdk` 35, package `com.portablediag.permafrost`.
-- No third-party runtime libraries beyond AndroidX + Material 3.
+- No third-party runtime libraries beyond AndroidX + Material 3
+  (`androidx.biometric` backs the optional app lock).
 
 ## Layout
 
 ```
 core/    Root shell, Freezer (Method A), Ghost (Method B), Manager,
          WatcherService, ForegroundApps, InstalledApps, IconFrost, Shortcuts,
-         BootReceiver, CrashHandler
+         BootReceiver, CrashHandler, AppLock
 model/   ManagedApp, Mode, Store (JSON in SharedPreferences)
-ui/      MainActivity, AppPickerActivity, AppDetailActivity, SettingsActivity,
-         SettingsFragment, ManagedAppAdapter, PickerAdapter, SystemBars
+ui/      LockedActivity (base), MainActivity, AppPickerActivity,
+         AppDetailActivity, SettingsActivity, SettingsFragment,
+         ManagedAppAdapter, PickerAdapter, SystemBars
 ProxyActivity   the tap target behind every frost icon
 App             installs the crash handler
 ```
@@ -119,6 +149,9 @@ If the app ever crashes, a report is saved to
 - Ghost mode reinstalls on every launch (slow); a few apps dislike restored data.
   See the warning in the Ghost section above — it backs up once, and its backup
   is the app's only remaining copy.
+- The app lock guards Permafrost's UI; frost icons stay one-tap unless you opt
+  into **Also lock frost icons**. Either way the lock falls open if the device's
+  screen lock is removed.
 - Re-freeze has a ~1s detection lag by design (Usage Access polling), on top of
   the configured delay.
 - Automatic re-freeze depends entirely on Usage Access; without it, apps wake and

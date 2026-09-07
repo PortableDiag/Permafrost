@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +29,7 @@ import com.portablediag.permafrost.model.Store;
 import java.util.List;
 
 /** Home screen: the list of managed apps plus permission status and an add button. */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends LockedActivity {
 
     private RecyclerView list;
     private View empty;
@@ -74,7 +73,11 @@ public class MainActivity extends AppCompatActivity {
         MaterialButton grant = findViewById(R.id.banner_action);
         grant.setOnClickListener(v ->
                 startActivity(ForegroundApps.usageAccessSettings()));
+    }
 
+    /** Held back until the lock (if any) has been cleared. */
+    @Override
+    protected void onUnlocked() {
         showPendingCrash();
     }
 

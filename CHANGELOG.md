@@ -8,9 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
-## [Unreleased]
+## [1.4] — 2026-09-06
 
-Nothing yet.
+Tagged `v1.4`. Version bumped to `1.4` / versionCode 5.
+
+The lock itself was exercised on an Android 15 / API 35 emulator: both the
+biometric and the device-credential paths, the in-prompt PIN fallback, refusal,
+the re-lock after backgrounding and after process death, and the frost-icon gate
+in both positions. The root-dependent paths (freeze, thaw, ghost) were not
+re-tested for this change and are unaffected by it.
+
+### Added
+
+- **Optional app lock.** *Settings → Security → Require unlock to open
+  Permafrost*, off by default. When on, every Permafrost screen — the managed-app
+  list, the picker, an app's detail screen and Settings — asks for a
+  **biometric** if one is enrolled, and falls back to the **device PIN, pattern
+  or password** otherwise. The switch stays disabled until the device has a
+  screen lock at all.
+- **Also lock frost icons**, a second switch under the same category. Off by
+  default and inert unless the main lock is on. With it on, `ProxyActivity`
+  challenges the user before waking the app, so a frozen app cannot be launched
+  from its icon by someone holding the phone.
+- While the lock is enabled the window is marked `FLAG_SECURE`, so the list of
+  frozen apps does not appear in the recent-apps thumbnail.
+
+### Notes
+
+- **Frost icons stay one-tap by default.** Gating `ProxyActivity` puts a prompt
+  in front of every wake, which is a real cost to the whole point of a frost
+  icon — so it is opt-in rather than part of the main lock.
+- `ProxyActivity` is now a `FragmentActivity` (it has to host the prompt). With
+  the icon lock off it behaves exactly as before.
+- The lock **fails open** if the device's screen lock is removed after the
+  setting was enabled — Permafrost will not lock a user out of their own app.
+- Re-locks once Permafrost has been off screen for more than two seconds; the
+  grace window keeps a rotation or an activity handover from re-prompting.
+- Cancelling the prompt finishes the whole task rather than just the top
+  activity, so the screen underneath is never exposed.
+- Adds one AndroidX dependency, `androidx.biometric:biometric:1.1.0`, and the
+  `USE_BIOMETRIC` permission.
 
 ## [1.3] — 2026-07-08
 
@@ -108,5 +145,5 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
-[Unreleased]: https://github.com/PortableDiag/Permafrost/compare/v1.3...HEAD
+[1.4]: https://github.com/PortableDiag/Permafrost/compare/v1.3...v1.4
 [1.3]: https://github.com/PortableDiag/Permafrost/releases/tag/v1.3

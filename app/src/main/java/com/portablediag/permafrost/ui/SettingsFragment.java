@@ -8,8 +8,10 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SeekBarPreference;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.portablediag.permafrost.R;
+import com.portablediag.permafrost.core.AppLock;
 import com.portablediag.permafrost.core.ForegroundApps;
 import com.portablediag.permafrost.core.Root;
 import com.portablediag.permafrost.model.Mode;
@@ -61,6 +63,43 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             return true;
         });
         behaviour.addPreference(delay);
+
+        // --- Security ---
+        PreferenceCategory security = new PreferenceCategory(requireContext());
+        security.setTitle(R.string.settings_security);
+        screen.addPreference(security);
+
+        // Re-read what the device can challenge with every time this screen is
+        // built: the user can add or remove a screen lock at any point.
+        AppLock.Method method = AppLock.available(requireContext());
+        SwitchPreferenceCompat appLock = new SwitchPreferenceCompat(requireContext());
+        appLock.setKey("app_lock");
+        appLock.setTitle(R.string.settings_app_lock);
+        appLock.setEnabled(method != AppLock.Method.NONE);
+        appLock.setChecked(store.appLockEnabled() && method != AppLock.Method.NONE);
+        appLock.setSummary(method == AppLock.Method.BIOMETRIC ? R.string.settings_app_lock_biometric
+                : method == AppLock.Method.CREDENTIAL ? R.string.settings_app_lock_credential
+                : R.string.settings_app_lock_unavailable);
+        final SwitchPreferenceCompat lockIcons = new SwitchPreferenceCompat(requireContext());
+        lockIcons.setKey("app_lock_icons");
+        lockIcons.setTitle(R.string.settings_lock_icons);
+        lockIcons.setSummary(R.string.settings_lock_icons_sum);
+        // Only meaningful while the master lock is on, so it follows it.
+        lockIcons.setEnabled(appLock.isChecked());
+        lockIcons.setChecked(store.lockFrostIcons() && appLock.isChecked());
+        lockIcons.setOnPreferenceChangeListener((p, v) -> {
+            store.setLockFrostIcons((Boolean) v);
+            return true;
+        });
+
+        appLock.setOnPreferenceChangeListener((p, v) -> {
+            boolean on = (Boolean) v;
+            store.setAppLockEnabled(on);
+            lockIcons.setEnabled(on);
+            return true;
+        });
+        security.addPreference(appLock);
+        security.addPreference(lockIcons);
 
         // --- Permissions / status ---
         PreferenceCategory status = new PreferenceCategory(requireContext());

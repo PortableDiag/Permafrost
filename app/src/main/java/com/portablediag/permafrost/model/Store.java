@@ -23,6 +23,8 @@ public class Store {
     private static final String KEY_DEFAULT_MODE = "default_mode";
     private static final String KEY_REFREEZE_DELAY = "refreeze_delay_sec";
     private static final String KEY_ONBOARDED = "onboarded";
+    private static final String KEY_APP_LOCK = "app_lock";
+    private static final String KEY_APP_LOCK_ICONS = "app_lock_icons";
 
     private final SharedPreferences prefs;
     // Preserve insertion order for a stable list.
@@ -112,6 +114,24 @@ public class Store {
 
     public void setRefreezeDelaySec(int sec) {
         prefs.edit().putInt(KEY_REFREEZE_DELAY, sec).apply();
+    }
+
+    /** Require a biometric or device-credential unlock to open Permafrost's UI. */
+    public boolean appLockEnabled() {
+        return prefs.getBoolean(KEY_APP_LOCK, false);
+    }
+
+    public void setAppLockEnabled(boolean v) {
+        prefs.edit().putBoolean(KEY_APP_LOCK, v).apply();
+    }
+
+    /** Challenge a frost-icon tap too. Only meaningful while the lock is on. */
+    public boolean lockFrostIcons() {
+        return prefs.getBoolean(KEY_APP_LOCK_ICONS, false);
+    }
+
+    public void setLockFrostIcons(boolean v) {
+        prefs.edit().putBoolean(KEY_APP_LOCK_ICONS, v).apply();
     }
 
     public boolean isOnboarded() {

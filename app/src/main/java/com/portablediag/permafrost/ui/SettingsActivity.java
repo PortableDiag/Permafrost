@@ -2,13 +2,11 @@ package com.portablediag.permafrost.ui;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.appbar.MaterialToolbar;
 import com.portablediag.permafrost.R;
 
 /** Hosts the settings fragment. */
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends LockedActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
