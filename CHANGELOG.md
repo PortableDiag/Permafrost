@@ -12,11 +12,16 @@ release diffs; the file did not exist while those versions shipped.
 
 Tagged `v1.4`. Version bumped to `1.4` / versionCode 5.
 
-The lock itself was exercised on an Android 15 / API 35 emulator: both the
-biometric and the device-credential paths, the in-prompt PIN fallback, refusal,
-the re-lock after backgrounding and after process death, and the frost-icon gate
-in both positions. The root-dependent paths (freeze, thaw, ghost) were not
-re-tested for this change and are unaffected by it.
+The lock was exercised on an Android 15 / API 35 emulator: both the biometric
+and the device-credential paths, the in-prompt PIN fallback, refusal, the
+re-lock after backgrounding and after process death, and the frost-icon gate in
+both positions.
+
+A full freeze → wake → auto-refreeze cycle was then run on a rooted Android 15
+handset: the frost-icon trampoline thawed the target (`enabled=3` → `1`),
+launched it, and the watcher returned it to dormancy about four seconds after
+the app was left. Ghost mode was not exercised and is unchanged by this
+release.
 
 ### Added
 
