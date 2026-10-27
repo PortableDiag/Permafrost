@@ -60,6 +60,88 @@ public class Manager {
         return err;
     }
 
+    /**
+     * Bring a package under management in {@code mode} and put it to sleep.
+     * Returns null on success. The app stays managed even if the first freeze
+     * fails, exactly as the picker has always left it.
+     */
+    public static String add(Context ctx, String pkg, Mode mode) {
+        ManagedApp app = new ManagedApp(pkg, InstalledApps.labelOf(ctx, pkg), mode);
+        Store.get(ctx).put(app);
+        return makeDormant(ctx, app);
+    }
+
+    /**
+     * Wake the app if it is dormant, launch it, and hand it to the watcher unless
+     * it is unlocked for updating. {@code viaRoot} starts it through {@code am}
+     * instead of an intent — needed when Permafrost itself is in the background
+     * (the API), where Android blocks an ordinary activity start.
+     */
+    public static String launch(Context ctx, ManagedApp app, boolean viaRoot) {
+        String err = null;
+        if (isDormantOnDevice(ctx, app)) {
+            err = wake(ctx, app);
+        }
+        if (err != null) return err;
+        if (viaRoot) {
+            Freezer.launchViaRoot(app.packageName);
+        } else {
+            Freezer.launch(ctx, app.packageName);
+        }
+        if (!app.updateUnlocked) WatcherService.watch(ctx, app.packageName);
+        return null;
+    }
+
+    /** Wake the app and keep it awake — no auto re-freeze — so it can be updated. */
+    public static String unlockForUpdate(Context ctx, ManagedApp app) {
+        String err = null;
+        if (isDormantOnDevice(ctx, app)) {
+            err = wake(ctx, app);
+        }
+        if (err == null) {
+            app.updateUnlocked = true;
+            app.dormant = false;
+            Store.get(ctx).put(app);
+        }
+        return err;
+    }
+
+    /**
+     * Switch an app between Freeze and Ghost. A dormant app is woken in the old
+     * mode first and put back to sleep in the new one.
+     */
+    public static String changeMode(Context ctx, ManagedApp app, Mode newMode) {
+        if (newMode == app.mode) return null;
+        boolean wasDormant = app.dormant && !app.updateUnlocked;
+        // If currently dormant, lift it in the OLD mode first.
+        if (isDormantOnDevice(ctx, app)) {
+            String err = wake(ctx, app);
+            if (err != null) return err;
+        }
+        // Discard any stale ghost backup when leaving ghost mode.
+        if (app.mode == Mode.GHOST && newMode != Mode.GHOST) {
+            Ghost.deleteBackup(ctx, app.packageName);
+            app.hasBackup = false;
+        }
+        app.mode = newMode;
+        Store.get(ctx).put(app);
+        // Re-apply dormancy in the NEW mode if it was dormant before.
+        if (wasDormant) {
+            return makeDormant(ctx, app);
+        }
+        return null;
+    }
+
+    /** Restore the app to a normal, usable state and stop managing it. */
+    public static void unmanage(Context ctx, ManagedApp app) {
+        if (isDormantOnDevice(ctx, app)) {
+            wake(ctx, app);
+        }
+        Ghost.deleteBackup(ctx, app.packageName);
+        if (app.hasShortcut) Shortcuts.unpin(ctx, app.packageName);
+        Store.get(ctx).remove(app.packageName);
+    }
+
     /** Whether the app is presently dormant on the device (source of truth: device). */
     public static boolean isDormantOnDevice(Context ctx, ManagedApp app) {
         if (app.mode == Mode.GHOST) {

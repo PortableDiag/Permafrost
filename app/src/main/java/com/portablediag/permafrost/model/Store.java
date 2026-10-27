@@ -25,6 +25,9 @@ public class Store {
     private static final String KEY_ONBOARDED = "onboarded";
     private static final String KEY_APP_LOCK = "app_lock";
     private static final String KEY_APP_LOCK_ICONS = "app_lock_icons";
+    private static final String KEY_PALETTE = "palette";
+    private static final String KEY_DARK_MODE = "dark_mode";
+    private static final String KEY_ASKED_NOTIFICATIONS = "asked_notifications";
 
     private final SharedPreferences prefs;
     // Preserve insertion order for a stable list.
@@ -132,6 +135,38 @@ public class Store {
 
     public void setLockFrostIcons(boolean v) {
         prefs.edit().putBoolean(KEY_APP_LOCK_ICONS, v).apply();
+    }
+
+    /** The house palette, saved by its name. Material You when unset. */
+    public String palette() {
+        return prefs.getString(KEY_PALETTE, "Material You");
+    }
+
+    public void setPalette(String name) {
+        prefs.edit().putString(KEY_PALETTE, name).apply();
+    }
+
+    /** "system", "light" or "dark". Only palettes with a light form follow it. */
+    public String darkMode() {
+        return prefs.getString(KEY_DARK_MODE, "system");
+    }
+
+    public void setDarkMode(String mode) {
+        prefs.edit().putString(KEY_DARK_MODE, mode).apply();
+    }
+
+    /** Whether the notification permission has been asked for once already. */
+    public boolean askedNotifications() {
+        return prefs.getBoolean(KEY_ASKED_NOTIFICATIONS, false);
+    }
+
+    public void setAskedNotifications(boolean v) {
+        prefs.edit().putBoolean(KEY_ASKED_NOTIFICATIONS, v).apply();
+    }
+
+    /** The prefs file everything is stored in, for settings that keep their own keys. */
+    public SharedPreferences prefs() {
+        return prefs;
     }
 
     public boolean isOnboarded() {

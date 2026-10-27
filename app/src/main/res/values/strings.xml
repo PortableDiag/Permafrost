@@ -79,6 +79,38 @@
 
     <string name="detail_mode_label">Method</string>
 
+    <!-- Appearance -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_palette">Theme</string>
+    <string name="settings_dark_mode">Light or dark</string>
+    <string name="settings_dark_mode_fixed">%1$s has one look. Only Material You, Ocean and Terminal have a light and a dark form.</string>
+    <string name="dark_mode_system">Follow system</string>
+    <string name="dark_mode_light">Light</string>
+    <string name="dark_mode_dark">Dark</string>
+
+    <!-- Local API -->
+    <string name="settings_api">Local API</string>
+    <string name="settings_api_enable">Local API</string>
+    <string name="settings_api_off">Off. When on, scripts and agents on this phone can do everything Permafrost does — freeze, wake, launch, add, remove — if they hold the key.</string>
+    <string name="settings_api_on">Listening on %1$s</string>
+    <string name="settings_api_starting">Starting…</string>
+    <string name="settings_api_error">Not running: %1$s</string>
+    <string name="settings_api_key">API key</string>
+    <string name="settings_api_key_none">Generated when you switch the API on.</string>
+    <string name="settings_api_key_copied">API key copied.</string>
+    <string name="settings_api_new_key">Issue a new key</string>
+    <string name="settings_api_new_key_sum">The old key stops working at once.</string>
+    <string name="settings_api_new_key_confirm">Anything using the current key will be refused until it is given the new one.</string>
+    <string name="settings_api_port">Port</string>
+    <string name="settings_api_port_bad">Port must be between 1024 and 65535.</string>
+    <string name="settings_api_lan">Reachable from the local network</string>
+    <string name="settings_api_lan_sum">Off: only this phone (and a computer through adb forward) can reach it. On: anything on your Wi‑Fi that has the key can freeze and wake your apps.</string>
+    <string name="settings_api_docs">Reference: GET /api/docs with the key.</string>
+    <string name="api_channel">Local API</string>
+    <string name="api_notification_title">Permafrost API is on</string>
+    <string name="api_notification_text">Listening on %1$s</string>
+    <string name="api_stop">Turn off</string>
+
     <!-- Crash reporter -->
     <string name="crash_title">Permafrost crashed last time</string>
     <string name="crash_share">Share</string>

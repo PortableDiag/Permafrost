@@ -13,4 +13,86 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+
+    <!-- The mono palettes (Terminal, Amber Terminal, Phosphor Green, Phosphor P31)
+         set the whole type ramp in monospace, applied on top of the palette. -->
+    <style name="ThemeOverlay.Permafrost.Mono" parent="">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.Permafrost.Mono.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.Permafrost.Mono.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Permafrost.Mono.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Permafrost.Mono.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Permafrost.Mono.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Permafrost.Mono.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Permafrost.Mono.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Permafrost.Mono.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Permafrost.Mono.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Permafrost.Mono.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Permafrost.Mono.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Permafrost.Mono.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Permafrost.Mono.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Permafrost.Mono.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Permafrost.Mono.LabelSmall</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.DisplayLarge" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.DisplayMedium" parent="TextAppearance.Material3.DisplayMedium">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+    <style name="TextAppearance.Permafrost.Mono.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:fontFamily">monospace</item>
+        <item name="fontFamily">monospace</item>
+    </style>
 </resources>

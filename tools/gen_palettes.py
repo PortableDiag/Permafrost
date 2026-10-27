@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""Generate Permafrost's copy of the house palettes.
+
+    python3 -I tools/gen_palettes.py <path to ProjectForge palettes.toml>
+
+Writes two files, both marked generated:
+
+  app/src/main/res/values/palettes.xml       one theme overlay per palette (and a
+                                             .Light overlay for those with a light form)
+  app/src/main/java/.../ui/Palette.java      the picker's list, in the house order
+
+The role -> Material 3 mapping is the one ProjectForge's android-compose template uses
+(keyx() in Palettes.kt), so a palette looks the same here as in every other app.
+Saved choices are stored by name, so reordering or adding palettes never shifts one.
+"""
+import os
+import re
+import sys
+import tomllib
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+XML_OUT = os.path.join(ROOT, "app/src/main/res/values/palettes.xml")
+JAVA_OUT = os.path.join(ROOT, "app/src/main/java/com/portablediag/permafrost/ui/Palette.java")
+
+# Material 3 ColorScheme role -> theme attribute.
+SPECIAL = {
+    "background": "android:colorBackground",
+    "inverseSurface": "colorSurfaceInverse",
+    "inverseOnSurface": "colorOnSurfaceInverse",
+    "inversePrimary": "colorPrimaryInverse",
+}
+
+
+def attr(role):
+    return SPECIAL.get(role, "color" + role[0].upper() + role[1:])
+
+
+def ident(name):
+    return re.sub(r"[^A-Za-z0-9]", "", name)
+
+
+def const(name):
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_").upper()
+
+
+def luminance(hex_):
+    def ch(v):
+        v /= 255.0
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (int(hex_[i:i + 2], 16) for i in (1, 3, 5))
+    return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b)
+
+
+def keyx(r):
+    """The house mapping from the twelve KeyX roles to Material 3 roles."""
+    bg, text = r["background"], r["text"]
+    return {
+        "primary": r["accent"], "onPrimary": r.get("on_accent", bg),
+        "primaryContainer": r["pressed"], "onPrimaryContainer": text,
+        "secondary": r["accent_secondary"], "onSecondary": bg,
+        "secondaryContainer": r["pressed"], "onSecondaryContainer": text,
+        "tertiary": r["highlight"], "onTertiary": bg,
+        "tertiaryContainer": r["pressed"], "onTertiaryContainer": text,
+        "background": bg, "onBackground": text,
+        "surface": bg, "onSurface": text,
+        "surfaceVariant": r["surface"], "onSurfaceVariant": r["text_secondary"],
+        "surfaceContainerLowest": bg, "surfaceContainerLow": r["bars"],
+        "surfaceContainer": r["bars"], "surfaceContainerHigh": r["raised"],
+        "surfaceContainerHighest": r["surface"], "surfaceBright": r["raised"], "surfaceDim": bg,
+        "outline": r["border"], "outlineVariant": r["border"],
+        "inverseSurface": text, "inverseOnSurface": bg, "inversePrimary": r["pressed"],
+    }
+
+
+def light_form(l):
+    """A palette's own light scheme, with the roles it leaves out filled from its neighbours."""
+    m = dict(l)
+    m.setdefault("outlineVariant", m.get("outline"))
+    m.setdefault("surfaceContainerLowest", m.get("surface"))
+    m.setdefault("surfaceContainerLow", m.get("surfaceContainer"))
+    m.setdefault("inverseSurface", m.get("onSurface"))
+    m.setdefault("inverseOnSurface", m.get("surface"))
+    return {k: v for k, v in m.items() if v}
+
+
+def style(name, roles):
+    lines = [f'    <style name="{name}" parent="">']
+    for role in sorted(roles):
+        lines.append(f'        <item name="{attr(role)}">{roles[role].upper()}</item>')
+    lines.append("    </style>")
+    return "\n".join(lines)
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    with open(sys.argv[1], "rb") as f:
+        palettes = tomllib.load(f)["palette"]
+
+    styles, entries = [], []
+    for p in palettes:
+        name = p["name"]
+        label = p.get("label", name)
+        mono = bool(p.get("mono"))
+        dynamic = bool(p.get("dynamic"))
+        has_light = "light" in p
+        dark_res = light_res = "0"
+        light_bg = False
+        if not dynamic:
+            scheme = keyx(p["roles"])
+            scheme.update(p.get("overrides", {}))
+            sid = "ThemeOverlay.Permafrost.Palette." + ident(name)
+            styles.append(style(sid, scheme))
+            dark_res = "R.style." + sid.replace(".", "_")
+            light_bg = luminance(p["roles"]["background"]) > 0.5
+            if has_light:
+                styles.append(style(sid + ".Light", light_form(p["light"])))
+                light_res = "R.style." + (sid + ".Light").replace(".", "_")
+        follows = dynamic or has_light
+        entries.append(
+            f'    {const(name)}("{name}", "{label}", {str(follows).lower()}, {str(mono).lower()},\n'
+            f'            {dark_res}, {light_res}, {str(light_bg).lower()})')
+
+    with open(XML_OUT, "w") as f:
+        f.write('<?xml version="1.0" encoding="utf-8"?>\n'
+                "<!-- GENERATED by tools/gen_palettes.py from ProjectForge palettes.toml. Do not edit. -->\n"
+                "<resources>\n" + "\n\n".join(styles) + "\n</resources>\n")
+
+    with open(JAVA_OUT, "w") as f:
+        f.write(f"""package com.portablediag.permafrost.ui;
+
+import com.portablediag.permafrost.R;
+
+/**
+ * The house palettes, in the picker's order. GENERATED by tools/gen_palettes.py
+ * from ProjectForge palettes.toml — do not edit; regenerate.
+ *
+ * <p>Saved by {{@link #id}} (the house name), never by position, so adding or
+ * reordering palettes never changes the one a user picked.
+ */
+public enum Palette {{
+{(","+chr(10)).join(entries)};
+
+    /** The house name — what is saved, and what the API takes. */
+    public final String id;
+    public final String label;
+    /** Has both a light and a dark form, so the light/dark setting applies. */
+    public final boolean followsMode;
+    /** Sets the whole type ramp in monospace. */
+    public final boolean mono;
+    /** Theme overlay for the dark (or only) form; 0 for Material You. */
+    final int darkStyle;
+    /** Theme overlay for the light form; 0 when there is none. */
+    final int lightStyle;
+    /** The only form is a light one (dark status-bar icons). */
+    final boolean lightOnly;
+
+    Palette(String id, String label, boolean followsMode, boolean mono,
+            int darkStyle, int lightStyle, boolean lightOnly) {{
+        this.id = id;
+        this.label = label;
+        this.followsMode = followsMode;
+        this.mono = mono;
+        this.darkStyle = darkStyle;
+        this.lightStyle = lightStyle;
+        this.lightOnly = lightOnly;
+    }}
+
+    public boolean isDynamic() {{
+        return darkStyle == 0;
+    }}
+
+    /** Looks a palette up by its house name, ignoring case; the fallback when unknown. */
+    public static Palette fromId(String id, Palette fallback) {{
+        if (id == null) return fallback;
+        for (Palette p : values()) {{
+            if (p.id.equalsIgnoreCase(id.trim())) return p;
+        }}
+        return fallback;
+    }}
+}}
+""")
+    print(f"{len(palettes)} palettes -> {os.path.relpath(XML_OUT, ROOT)}, {os.path.relpath(JAVA_OUT, ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,14 +1,19 @@
 package com.portablediag.permafrost.ui;
 
+import android.Manifest;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
@@ -20,6 +25,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.portablediag.permafrost.R;
+import com.portablediag.permafrost.api.ApiService;
 import com.portablediag.permafrost.core.CrashHandler;
 import com.portablediag.permafrost.core.ForegroundApps;
 import com.portablediag.permafrost.core.Root;
@@ -35,12 +41,18 @@ public class MainActivity extends LockedActivity {
     private View empty;
     private ManagedAppAdapter adapter;
     private MaterialCardView banner;
+    private ActivityResultLauncher<String> notifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SystemBars.pad(findViewById(R.id.root));
+        notifications = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(), granted -> { });
+        // A switched-on API that was stopped (killed, or refused a background
+        // start) comes back whenever Permafrost is opened.
+        ApiService.startIfEnabled(this);
 
         // Prompt for root up front so the su dialog appears at launch, not on
         // the first freeze. Runs off the UI thread; the result is cached.
@@ -79,6 +91,22 @@ public class MainActivity extends LockedActivity {
     @Override
     protected void onUnlocked() {
         showPendingCrash();
+        askNotificationsOnce();
+    }
+
+    /**
+     * Android 13+ hides a foreground service's notification until the app is
+     * allowed to post one — the watcher and the API keep running either way, but
+     * invisibly. Ask once; after that the choice is the user's, in system settings.
+     */
+    private void askNotificationsOnce() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
+        Store store = Store.get(this);
+        if (store.askedNotifications()) return;
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) return;
+        store.setAskedNotifications(true);
+        notifications.launch(Manifest.permission.POST_NOTIFICATIONS);
     }
 
     /** If the app crashed last run, show the captured report once (copy/share). */

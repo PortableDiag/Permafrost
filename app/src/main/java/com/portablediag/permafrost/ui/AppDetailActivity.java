@@ -13,13 +13,10 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.portablediag.permafrost.R;
-import com.portablediag.permafrost.core.Ghost;
-import com.portablediag.permafrost.core.Freezer;
 import com.portablediag.permafrost.core.Manager;
 import com.portablediag.permafrost.core.Root;
 import com.portablediag.permafrost.core.Shortcuts;
 import com.portablediag.permafrost.core.InstalledApps;
-import com.portablediag.permafrost.core.WatcherService;
 import com.portablediag.permafrost.model.ManagedApp;
 import com.portablediag.permafrost.model.Mode;
 import com.portablediag.permafrost.model.Store;
@@ -150,17 +147,7 @@ public class AppDetailActivity extends LockedActivity {
     }
 
     private void launch() {
-        bg(() -> {
-            String err = null;
-            if (Manager.isDormantOnDevice(this, app)) {
-                err = Manager.wake(this, app);
-            }
-            if (err == null) {
-                Freezer.launch(this, pkg);
-                if (!app.updateUnlocked) WatcherService.watch(this, pkg);
-            }
-            return err;
-        }, "Launch failed: %s");
+        bg(() -> Manager.launch(this, app, false), "Launch failed: %s");
     }
 
     private void toggleUpdate() {
@@ -169,43 +156,12 @@ public class AppDetailActivity extends LockedActivity {
             bg(() -> Manager.makeDormant(this, app), "Re-freeze failed: %s");
         } else {
             // Unlock for update: wake and keep it awake (no auto-refreeze).
-            bg(() -> {
-                String err = null;
-                if (Manager.isDormantOnDevice(this, app)) {
-                    err = Manager.wake(this, app);
-                }
-                if (err == null) {
-                    app.updateUnlocked = true;
-                    app.dormant = false;
-                    Store.get(this).put(app);
-                }
-                return err;
-            }, "Unlock failed: %s");
+            bg(() -> Manager.unlockForUpdate(this, app), "Unlock failed: %s");
         }
     }
 
     private void changeMode(Mode newMode) {
-        bg(() -> {
-            boolean wasDormant = app.dormant && !app.updateUnlocked;
-            // If currently dormant, lift it in the OLD mode first.
-            String err = null;
-            if (Manager.isDormantOnDevice(this, app)) {
-                err = Manager.wake(this, app);
-                if (err != null) return err;
-            }
-            // Discard any stale ghost backup when leaving ghost mode.
-            if (app.mode == Mode.GHOST && newMode != Mode.GHOST) {
-                Ghost.deleteBackup(this, pkg);
-                app.hasBackup = false;
-            }
-            app.mode = newMode;
-            Store.get(this).put(app);
-            // Re-apply dormancy in the NEW mode if it was dormant before.
-            if (wasDormant) {
-                return Manager.makeDormant(this, app);
-            }
-            return null;
-        }, "Mode change failed: %s");
+        bg(() -> Manager.changeMode(this, app, newMode), "Mode change failed: %s");
     }
 
     private void addShortcut() {
@@ -230,12 +186,7 @@ public class AppDetailActivity extends LockedActivity {
     private void doRemove() {
         bg(() -> {
             // Restore the app to a normal, usable state before letting go.
-            if (Manager.isDormantOnDevice(this, app)) {
-                Manager.wake(this, app);
-            }
-            Ghost.deleteBackup(this, pkg);
-            if (app.hasShortcut) Shortcuts.unpin(this, pkg);
-            Store.get(this).remove(pkg);
+            Manager.unmanage(this, app);
             return null;
         }, "Remove failed: %s");
     }

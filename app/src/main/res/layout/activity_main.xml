@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
             android:visibility="gone"
-            app:cardBackgroundColor="@color/frost_ice">
+            app:cardBackgroundColor="?attr/colorSecondaryContainer">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,14 +41,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/perm_banner_title"
-                    android:textColor="@color/frost_primary_dark"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:textAppearance="?attr/textAppearanceTitleMedium" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="@color/black"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:text="@string/perm_banner_text" />
 
                 <com.google.android.material.button.MaterialButton

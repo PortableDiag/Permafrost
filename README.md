@@ -82,6 +82,56 @@ otherwise. The switch is greyed out until the device has a screen lock set.
   prompt** rather than locking you out of your own app. Re-adding a screen lock
   restores the lock.
 
+## Themes
+
+**Settings → Appearance → Theme.** All 17 house palettes: Material You (wallpaper
+colours, the default), Ocean, Terminal, Trellis, Graphite, Blueprint, Futuristic,
+Neon, SynthWave, White Glow, Silkscreen, Sticky Notes, Amber Terminal, Phosphor
+Green, Phosphor P31, Zoro and Nebula.
+
+- **Light or dark** applies to Material You, Ocean and Terminal — the palettes
+  that have both forms. Every other palette is one look.
+- The terminal palettes (Terminal, Amber Terminal, Phosphor Green, Phosphor P31)
+  set all text in monospace.
+- Status- and navigation-bar icons follow the palette's background, not the
+  system's dark mode.
+
+The palettes are generated from the shared house definition:
+`python3 tools/gen_palettes.py <path to palettes.toml>` rewrites
+`res/values/palettes.xml` and `ui/Palette.java`. Don't edit those two by hand.
+
+## Local API
+
+**Settings → Local API.** Off by default. Switched on, Permafrost listens on
+`127.0.0.1:8791` for scripts and agents **on this phone**, and the API can do
+everything the app does: list, add and remove managed apps, freeze, wake, launch,
+unlock for update, switch method, request a frost icon, and read or change
+settings and the theme.
+
+- **A key is required** on every call except `GET /api/health`. Permafrost
+  generates it; you never type one. Send it as `X-API-Key` or
+  `Authorization: Bearer`. **Issue a new key** cuts off the old one at once.
+- **Loopback only** unless you turn on *Reachable from the local network*. From a
+  computer, use `adb forward tcp:8791 tcp:8791`.
+- While it is on, a notification says so, with a **Turn off** button. It comes
+  back by itself after a reboot or an update.
+- `GET /api/docs` returns the full reference.
+
+```bash
+KEY=...   # Settings -> Local API -> API key (tap to copy)
+curl -s -H "X-API-Key: $KEY" 127.0.0.1:8791/api/docs
+curl -s -H "X-API-Key: $KEY" 127.0.0.1:8791/api/apps
+curl -s -H "X-API-Key: $KEY" "127.0.0.1:8791/api/installed?q=bank"
+curl -s -H "X-API-Key: $KEY" -X POST 127.0.0.1:8791/api/apps -d '{"package":"com.example.bank"}'
+curl -s -H "X-API-Key: $KEY" -X POST 127.0.0.1:8791/api/apps/com.example.bank/launch
+curl -s -H "X-API-Key: $KEY" -X PATCH 127.0.0.1:8791/api/settings -d '{"palette":"Zoro"}'
+```
+
+The API is for a broker (such as PhoneAPI) to call on an agent's behalf. Per-agent
+pairing and allow/deny switches belong in that broker, not here. Anything that
+holds this key can wake every app Permafrost manages, so treat the key like a
+password.
+
 ## Updating a frozen app
 
 On the app's detail screen, **Unlock for update** thaws it and suppresses
@@ -101,7 +151,11 @@ auto-refreeze. Update it however you like (Play Store / sideload), then
   requested unless you turn that setting on, and it guards nothing but
   Permafrost's own UI.
 - **Query all packages** — to list installable apps.
-- **Foreground service** — the re-freeze watcher.
+- **Foreground service** — the re-freeze watcher, and the local API while it is on.
+- **Notifications** — asked once on Android 13+, so the watcher's and the API's
+  notifications are visible. Both work without it, just silently.
+- **Internet** — only for the local API. It is off by default, binds loopback
+  unless you choose otherwise, and Permafrost makes no outgoing connections.
 
 ## Build
 
@@ -131,9 +185,14 @@ core/    Root shell, Freezer (Method A), Ghost (Method B), Manager,
          WatcherService, ForegroundApps, InstalledApps, IconFrost, Shortcuts,
          BootReceiver, CrashHandler, AppLock
 model/   ManagedApp, Mode, Store (JSON in SharedPreferences)
+api/     the local API: Http (parser), ApiServer (socket), ApiRouter (routes,
+         auth, errors — no Android types), ApiBackend + PermafrostBackend,
+         ApiDocs, ApiPrefs, ApiService (foreground), ApiStatus
 ui/      LockedActivity (base), MainActivity, AppPickerActivity,
          AppDetailActivity, SettingsActivity, SettingsFragment,
-         ManagedAppAdapter, PickerAdapter, SystemBars
+         ManagedAppAdapter, PickerAdapter, SystemBars, Themes,
+         Palette (generated)
+tools/   gen_palettes.py — regenerates the palettes from the house definition
 ProxyActivity   the tap target behind every frost icon
 App             installs the crash handler
 ```

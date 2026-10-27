@@ -25,10 +25,16 @@ public abstract class LockedActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> credential;
     private boolean prompting;
+    /** The palette generation this screen was built with. */
+    private int themeGeneration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Every screen wears the chosen house palette; it must be on the theme
+        // before any view is inflated.
+        themeGeneration = Themes.apply(this);
         super.onCreate(savedInstanceState);
+        Themes.bars(this);
         // Must be registered before onStart, which is where the challenge is raised.
         credential = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -38,6 +44,13 @@ public abstract class LockedActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // The palette changed (in Settings, or through the API) while this screen
+        // sat in the back stack: rebuild it rather than show the old one.
+        if (themeGeneration != Themes.generation()) {
+            recreate();
+            return;
+        }
+        Themes.onStart(this);
         AppLock.onActivityStart();
 
         boolean enabled = AppLock.isEnabled(this);
@@ -63,6 +76,7 @@ public abstract class LockedActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Themes.onStop(this);
         AppLock.onActivityStop();
     }
 

@@ -8,6 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
+## [1.6] — 2026-10-27
+
+### Added
+
+- **Local API**, off by default (Settings → Local API). Once switched on it
+  listens on `127.0.0.1:8791` with a generated key and can do everything the app
+  does: list, add and remove apps; freeze, wake, launch, unlock for update;
+  switch method; request a frost icon; fetch the frosted icon; read or change
+  settings and the theme; read the latest crash report. `GET /api/health` needs no
+  key, and `GET /api/docs` returns the full reference. It is loopback-only unless
+  you turn on *Reachable from the local network*, it shows a notification with a
+  Turn off button while it runs, and it restarts after a reboot or an update.
+  Launches from the API go through `am`, because Android blocks an ordinary
+  activity start from an app in the background.
+- **All 17 house palettes** under Settings → Appearance → Theme, plus a
+  **Light / Dark / Follow system** choice for the palettes that have both forms
+  (Material You, Ocean, Terminal). The terminal palettes use monospace text, and
+  the status-bar icons follow the palette. A change applies at once, including
+  to screens already open.
+
+### Changed
+
+- On Android 13+ Permafrost asks once for notification permission. Without it
+  the re-freeze watcher's notification never appeared.
+- The *Usage access needed* banner follows the theme instead of a fixed light
+  blue.
+- Freeze, wake, launch, unlock-for-update, method changes and removal now run
+  through one shared code path, used by both the app and the API.
+
+### Tested
+
+On a rooted Android 15 handset, through the API: add → frozen, wake, freeze,
+launch from the background (the app came to the front) → re-frozen automatically
+3 s after leaving it, unlock for update, re-lock, remove. The device's disabled
+packages matched the before-snapshot exactly afterwards, and the notification's
+Turn off closed the port. Themes and every non-root route were exercised on an
+Android 15 emulator. Not exercised: Ghost mode, the method switch, and the UI's
+own Launch button (the same code as the API's launch, using an intent instead
+of `am`).
+
 ## [1.5] — 2026-09-06
 
 Ghost mode data safety. **If you use Ghost mode, this release matters.**
@@ -187,6 +227,7 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
+[1.6]: https://github.com/PortableDiag/Permafrost/compare/v1.5...v1.6
 [1.5]: https://github.com/PortableDiag/Permafrost/compare/v1.4...v1.5
 [1.4]: https://github.com/PortableDiag/Permafrost/compare/v1.3...v1.4
 [1.3]: https://github.com/PortableDiag/Permafrost/releases/tag/v1.3

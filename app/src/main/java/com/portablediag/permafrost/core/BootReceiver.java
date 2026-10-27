@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.portablediag.permafrost.api.ApiService;
 import com.portablediag.permafrost.model.ManagedApp;
 import com.portablediag.permafrost.model.Store;
 
@@ -16,7 +17,14 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) return;
+        String action = intent.getAction();
+        // Both are exempt from the background foreground-service ban, so this is
+        // where a switched-on API comes back after a reboot or an update.
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action)
+                || Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
+            ApiService.startIfEnabled(context);
+        }
+        if (!Intent.ACTION_BOOT_COMPLETED.equals(action)) return;
         final Context app = context.getApplicationContext();
         final android.content.BroadcastReceiver.PendingResult pr = goAsync();
         new Thread(() -> {

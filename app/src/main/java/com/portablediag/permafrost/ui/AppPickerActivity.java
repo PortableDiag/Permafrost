@@ -100,12 +100,10 @@ public class AppPickerActivity extends LockedActivity {
             final StringBuilder errors = new StringBuilder();
             final List<ManagedApp> added = new ArrayList<>();
             for (String pkg : pkgs) {
-                String label = InstalledApps.labelOf(this, pkg);
-                ManagedApp app = new ManagedApp(pkg, label, defMode);
-                Store.get(this).put(app);
-                String err = Manager.makeDormant(this, app);
+                String err = Manager.add(this, pkg, defMode);
+                ManagedApp app = Store.get(this).get(pkg);
                 if (err != null) {
-                    errors.append(label).append(": ").append(err).append('\n');
+                    errors.append(app.label).append(": ").append(err).append('\n');
                 } else {
                     added.add(app);
                 }
