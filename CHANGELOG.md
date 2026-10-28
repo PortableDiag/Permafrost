@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
+## [1.6.1] — 2026-10-27
+
+### Fixed
+
+- **A refused method change no longer leaves the app awake.** Switching a frozen
+  app to Ghost on a device where Ghost cannot capture app data (see 1.5's known
+  limitation) thawed the app, saved Ghost as its method, and then gave up, so the
+  app stayed awake and every later re-freeze failed the same way. Permafrost now
+  puts the old method back and re-freezes the app. Present since 1.5.
+
+### Tested
+
+On the rooted Android 15 handset: the detail screen's **Launch now** woke a
+frozen app, brought it to the front, and it was frozen again after leaving it.
+Freeze → Ghost was refused with the backup error, and the app was left installed;
+with this fix it also ends up frozen under Freeze.
+
 ## [1.6] — 2026-10-27
 
 ### Added
@@ -227,6 +244,7 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
+[1.6.1]: https://github.com/PortableDiag/Permafrost/compare/v1.6...v1.6.1
 [1.6]: https://github.com/PortableDiag/Permafrost/compare/v1.5...v1.6
 [1.5]: https://github.com/PortableDiag/Permafrost/compare/v1.4...v1.5
 [1.4]: https://github.com/PortableDiag/Permafrost/compare/v1.3...v1.4

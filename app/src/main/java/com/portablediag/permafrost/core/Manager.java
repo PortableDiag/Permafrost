@@ -112,6 +112,7 @@ public class Manager {
      */
     public static String changeMode(Context ctx, ManagedApp app, Mode newMode) {
         if (newMode == app.mode) return null;
+        Mode oldMode = app.mode;
         boolean wasDormant = app.dormant && !app.updateUnlocked;
         // If currently dormant, lift it in the OLD mode first.
         if (isDormantOnDevice(ctx, app)) {
@@ -127,7 +128,16 @@ public class Manager {
         Store.get(ctx).put(app);
         // Re-apply dormancy in the NEW mode if it was dormant before.
         if (wasDormant) {
-            return makeDormant(ctx, app);
+            String err = makeDormant(ctx, app);
+            if (err != null) {
+                // The new method refused (Ghost cannot capture the data on some
+                // devices). Go back to the old one rather than leave the app awake
+                // under a method that will keep failing.
+                app.mode = oldMode;
+                Store.get(ctx).put(app);
+                makeDormant(ctx, app);
+            }
+            return err;
         }
         return null;
     }

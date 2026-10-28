@@ -27,7 +27,8 @@ from disk between uses. Advanced option.
 >   stored snapshot is whatever the app looked like the first time you froze it.
 > - **Permafrost refuses to uninstall an app whose data it cannot archive.** If
 >   Ghost mode reports a backup failure, that is the safety net working — the app
->   is left installed and running. On some devices Permafrost's root shell cannot
+>   is left installed. Switching a frozen app to Ghost on such a device puts it
+>   back under Freeze and re-freezes it (since 1.6.1). On some devices Permafrost's root shell cannot
 >   read other apps' data directories at all, and Ghost mode simply cannot work
 >   there. Use Freeze mode.
 > - **The backup is the only copy.** A ghosted app has been uninstalled, so its
@@ -211,8 +212,8 @@ If the app ever crashes, a report is saved to
 
 - Root only. No device-owner / no-root path yet.
 - Ghost mode reinstalls on every launch (slow); a few apps dislike restored data.
-  See the warning in the Ghost section above — it backs up once, and its backup
-  is the app's only remaining copy.
+  See the warning in the Ghost section above: its backup is the app's only
+  remaining copy.
 - The app lock guards Permafrost's UI; frost icons stay one-tap unless you opt
   into **Also lock frost icons**. Either way the lock falls open if the device's
   screen lock is removed.
