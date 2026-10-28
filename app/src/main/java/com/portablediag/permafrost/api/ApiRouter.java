@@ -41,13 +41,31 @@ public class ApiRouter {
 
     private final ApiBackend backend;
     private final Supplier<String> expectedKey;
+    private final Supplier<PhoneApi.Grant> phoneApi;
+
+    /** Who a request's key belongs to. */
+    private enum Caller { NOBODY, OWNER, PHONEAPI }
 
     public ApiRouter(ApiBackend backend, Supplier<String> expectedKey) {
-        this.backend = backend;
-        this.expectedKey = expectedKey;
+        this(backend, expectedKey, () -> null);
     }
 
+    public ApiRouter(ApiBackend backend, Supplier<String> expectedKey, Supplier<PhoneApi.Grant> phoneApi) {
+        this.backend = backend;
+        this.expectedKey = expectedKey;
+        this.phoneApi = phoneApi;
+    }
+
+    /** Every answer, errors and 401s too, carries PhoneAPI's proof once it holds a proof key. */
     public ApiResponse handle(ApiRequest r) {
+        ApiResponse out = route(r);
+        String challenge = PhoneApi.usableChallenge(r.header(PhoneApi.HEADER_CHALLENGE));
+        PhoneApi.Grant g = challenge == null ? null : phoneApi.get();
+        if (g == null) return out;
+        return out.withHeader(PhoneApi.HEADER_PROOF, PhoneApi.proof(g.proofKey, challenge));
+    }
+
+    private ApiResponse route(ApiRequest r) {
         try {
             if (r.method.equals("OPTIONS")) return ApiResponse.noContent();
             if (!r.path.equals("/api") && !r.path.startsWith("/api/")) {
@@ -56,9 +74,19 @@ public class ApiRouter {
             }
             // Liveness answers without a key, so a watchdog needs no credential.
             if (r.path.equals("/api/health")) return get(r, this::health);
-            if (!authorised(r)) {
+            Caller who = caller(r);
+            if (who == Caller.NOBODY) {
                 return ApiResponse.error(401, "missing or invalid API key",
                         "send it as the X-API-Key header, or Authorization: Bearer <key>");
+            }
+            if (who == Caller.PHONEAPI) {
+                PhoneApi.Grant g = phoneApi.get();
+                boolean reading = r.method.equals("GET");
+                if (g == null || (reading ? !g.see : !g.change)) {
+                    return ApiResponse.error(403, "PhoneAPI's key may not "
+                                    + (reading ? "read from" : "change anything in") + " Permafrost",
+                            "the owner chose what it may do; Get a key in PhoneAPI (Providers, Permafrost) asks again");
+                }
             }
             return dispatch(r);
         } catch (ApiException e) {
@@ -68,10 +96,16 @@ public class ApiRouter {
         }
     }
 
-    /** Constant-time, so the timing of a compare can't leak how much of a key is right. */
-    private boolean authorised(ApiRequest r) {
-        String expected = expectedKey.get();
-        if (expected == null || expected.isEmpty()) return false;
+    private Caller caller(ApiRequest r) {
+        String offered = offeredKey(r);
+        if (offered == null) return Caller.NOBODY;
+        if (same(offered, expectedKey.get())) return Caller.OWNER;
+        PhoneApi.Grant g = phoneApi.get();
+        if (g != null && same(offered, g.key)) return Caller.PHONEAPI;
+        return Caller.NOBODY;
+    }
+
+    private static String offeredKey(ApiRequest r) {
         String offered = r.header("x-api-key");
         if (offered == null) {
             String auth = r.header("authorization");
@@ -79,7 +113,12 @@ public class ApiRouter {
                 offered = auth.substring(7).trim();
             }
         }
-        if (offered == null) return false;
+        return offered;
+    }
+
+    /** Constant-time, so the timing of a compare can't leak how much of a key is right. */
+    private static boolean same(String offered, String expected) {
+        if (expected == null || expected.isEmpty()) return false;
         byte[] a = offered.getBytes(StandardCharsets.UTF_8);
         byte[] b = expected.getBytes(StandardCharsets.UTF_8);
         if (a.length != b.length) return false;

@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** One response, held in memory — nothing this API returns is large. */
@@ -40,6 +41,13 @@ public class ApiResponse {
         this.contentType = contentType;
         this.body = body == null ? new byte[0] : body;
         this.extraHeaders = extraHeaders == null ? Collections.emptyMap() : extraHeaders;
+    }
+
+    /** The same response with one more header. */
+    public ApiResponse withHeader(String name, String value) {
+        Map<String, String> h = new LinkedHashMap<>(extraHeaders);
+        h.put(name, value);
+        return new ApiResponse(status, contentType, body, h);
     }
 
     public String reason() {

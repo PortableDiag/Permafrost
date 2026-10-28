@@ -73,7 +73,9 @@ public class ApiService extends Service {
         String address = ApiPrefs.bindAddress(this);
         int port = ApiPrefs.port(this);
         final Context app = getApplicationContext();
-        ApiRouter router = new ApiRouter(new PermafrostBackend(app), () -> ApiPrefs.key(app));
+        PhoneApiAccess.revokeIfGone(app);
+        ApiRouter router = new ApiRouter(new PermafrostBackend(app), () -> ApiPrefs.key(app),
+                () -> PhoneApiAccess.grant(app));
         ApiServer api = new ApiServer(router, address, port);
 
         // Foreground first: a service that binds before it has posted its

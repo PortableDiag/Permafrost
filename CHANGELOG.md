@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
+## [1.7] — 2026-10-27
+
+### Added
+
+- **PhoneAPI can connect to Permafrost.** PhoneAPI's *Get a key* opens *Let
+  PhoneAPI use Permafrost?*, which answers only PhoneAPI's release build (pinned
+  signing certificate, started for a result). You tick what its key may do,
+  **see** and/or **change**; both start off, and anything not ticked is refused
+  with a `403`. PhoneAPI gets its own key, never yours, plus a proof key and the
+  port, as the activity result only. The screen sits behind the app lock.
+- **Proof header.** While PhoneAPI holds a proof key, every response to a request
+  carrying `X-PhoneAPI-Challenge`, errors and `401`s included, carries
+  `X-PhoneAPI-Proof`, so PhoneAPI can tell Permafrost from another app on the
+  port.
+- *Settings › Local API › PhoneAPI* shows what PhoneAPI's key may do and revokes
+  it. It is also dropped when PhoneAPI is uninstalled, or no longer carries the
+  pinned certificate.
+- **Unit tests**: 44 JVM tests drive every documented route, auth, the error
+  statuses, settings validation, the PhoneAPI key's limits and the proof header
+  against an in-memory phone (`./gradlew :app:testDebugUnitTest`).
+
+### Tested
+
+On an Android 15 emulator with PhoneAPI 0.1.1's release build: a shell start of
+the grant screen was refused; *Get a key* → see only → PhoneAPI showed
+PermaFrost **Ready** (proof verified by PhoneAPI); its key read apps (`200`) and
+was refused a settings change (`403`) while the owner's key still worked; the
+proof on a `401` matched an independent HMAC. Uninstalling PhoneAPI dropped the
+key, and a second handshake with both boxes, then a revoke from Settings, did
+what they say.
+
 ## [1.6.1] — 2026-10-27
 
 ### Fixed
@@ -244,6 +275,7 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
+[1.7]: https://github.com/PortableDiag/Permafrost/compare/v1.6.1...v1.7
 [1.6.1]: https://github.com/PortableDiag/Permafrost/compare/v1.6...v1.6.1
 [1.6]: https://github.com/PortableDiag/Permafrost/compare/v1.5...v1.6
 [1.5]: https://github.com/PortableDiag/Permafrost/compare/v1.4...v1.5

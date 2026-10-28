@@ -25,6 +25,8 @@ import com.portablediag.permafrost.R;
 import com.portablediag.permafrost.api.ApiPrefs;
 import com.portablediag.permafrost.api.ApiService;
 import com.portablediag.permafrost.api.ApiStatus;
+import com.portablediag.permafrost.api.PhoneApi;
+import com.portablediag.permafrost.api.PhoneApiAccess;
 import com.portablediag.permafrost.core.AppLock;
 import com.portablediag.permafrost.core.ForegroundApps;
 import com.portablediag.permafrost.core.Root;
@@ -210,6 +212,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     private SwitchPreferenceCompat apiSwitch;
     private Preference apiKey;
+    private Preference phoneApi;
     private final Runnable apiListener = () -> {
         if (isAdded()) requireActivity().runOnUiThread(this::renderApi);
     };
@@ -300,6 +303,24 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         });
         cat.addPreference(lan);
 
+        phoneApi = new Preference(ctx);
+        phoneApi.setKey("api_phoneapi");
+        phoneApi.setTitle(R.string.settings_phoneapi);
+        phoneApi.setOnPreferenceClickListener(p -> {
+            if (PhoneApiAccess.grant(ctx) == null) return true;
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle(R.string.settings_phoneapi_revoke)
+                    .setMessage(R.string.settings_phoneapi_revoke_confirm)
+                    .setPositiveButton(R.string.settings_phoneapi_revoke, (d, w) -> {
+                        PhoneApiAccess.revoke(ctx);
+                        renderApi();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            return true;
+        });
+        cat.addPreference(phoneApi);
+
         Preference docs = new Preference(ctx);
         docs.setKey("api_docs");
         docs.setSummary(R.string.settings_api_docs);
@@ -325,6 +346,14 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         String key = ApiPrefs.key(ctx);
         apiKey.setSummary(key.isEmpty() ? getString(R.string.settings_api_key_none) : key);
         apiKey.setEnabled(!key.isEmpty());
+
+        PhoneApiAccess.revokeIfGone(ctx);
+        PhoneApi.Grant g = PhoneApiAccess.grant(ctx);
+        int what = g == null ? R.string.settings_phoneapi_none
+                : g.see && g.change ? R.string.settings_phoneapi_both
+                : g.see ? R.string.settings_phoneapi_see_only
+                : R.string.settings_phoneapi_change_only;
+        phoneApi.setSummary(what);
     }
 
     /** Marked sensitive, so Android 13+ doesn't preview the key in its clipboard overlay. */

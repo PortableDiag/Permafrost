@@ -51,6 +51,18 @@
             android:exported="false"
             android:parentActivityName=".ui.MainActivity" />
 
+        <!-- PhoneAPI asks for a key (its provider contract §3). The activity checks the
+             caller is PhoneAPI's release build before it shows anything. -->
+        <activity
+            android:name=".ui.PhoneApiGrantActivity"
+            android:exported="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.phoneapi.action.GRANT_KEY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- The frost-icon target. Home-screen shortcuts point here. -->
         <activity
             android:name=".ProxyActivity"
@@ -83,6 +95,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- PhoneAPI uninstalled: its key goes with it. -->
+        <receiver
+            android:name=".api.PhoneApiGoneReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
     </application>

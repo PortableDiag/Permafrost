@@ -133,6 +133,24 @@ pairing and allow/deny switches belong in that broker, not here. Anything that
 holds this key can wake every app Permafrost manages, so treat the key like a
 password.
 
+### PhoneAPI
+
+PhoneAPI never sees your key. Its **Providers › PermaFrost › Get a key** opens
+*Let PhoneAPI use Permafrost?* here, which:
+
+- answers only PhoneAPI's release build (its signing certificate is pinned), and
+  only when started for a result;
+- lets you tick what PhoneAPI's own key may do: **see** (every `GET`) and/or
+  **change** (everything else). Both start off; anything not ticked is a `403`;
+- switches the local API on if it was off, and hands PhoneAPI the key, a proof key
+  and the port as the activity result, never a file, broadcast or the clipboard.
+
+While PhoneAPI holds a proof key, every answer to a request carrying
+`X-PhoneAPI-Challenge` carries `X-PhoneAPI-Proof` (HMAC-SHA256 of the challenge),
+so PhoneAPI can tell Permafrost from some other app sitting on the port. Revoke
+the key under *Settings › Local API › PhoneAPI*; it is also dropped when PhoneAPI
+is uninstalled.
+
 ## Updating a frozen app
 
 On the app's detail screen, **Unlock for update** thaws it and suppresses
@@ -175,6 +193,12 @@ root. **Neither is in this repository** — both are gitignored, and the release
 clone still builds; it just produces an unsigned release APK. Supply your own
 keystore to sign.
 
+Unit tests (the whole API surface against an in-memory phone, no device needed):
+
+```bash
+./gradlew :app:testDebugUnitTest
+```
+
 - `minSdk` 26, `targetSdk` 35, package `com.portablediag.permafrost`.
 - No third-party runtime libraries beyond AndroidX + Material 3
   (`androidx.biometric` backs the optional app lock).
@@ -188,9 +212,11 @@ core/    Root shell, Freezer (Method A), Ghost (Method B), Manager,
 model/   ManagedApp, Mode, Store (JSON in SharedPreferences)
 api/     the local API: Http (parser), ApiServer (socket), ApiRouter (routes,
          auth, errors — no Android types), ApiBackend + PermafrostBackend,
-         ApiDocs, ApiPrefs, ApiService (foreground), ApiStatus
+         ApiDocs, ApiPrefs, ApiService (foreground), ApiStatus,
+         PhoneApi (proof + pin, no Android types), PhoneApiAccess (its key)
 ui/      LockedActivity (base), MainActivity, AppPickerActivity,
          AppDetailActivity, SettingsActivity, SettingsFragment,
+         PhoneApiGrantActivity,
          ManagedAppAdapter, PickerAdapter, SystemBars, Themes,
          Palette (generated)
 tools/   gen_palettes.py — regenerates the palettes from the house definition
