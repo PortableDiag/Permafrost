@@ -141,7 +141,8 @@ PhoneAPI never sees your key. Its **Providers › PermaFrost › Get a key** ope
 - answers only PhoneAPI's release build (its signing certificate is pinned), and
   only when started for a result;
 - lets you tick what PhoneAPI's own key may do: **see** (every `GET`) and/or
-  **change** (everything else). Both start off; anything not ticked is a `403`;
+  **change** (everything else). Both start off, or as the held key has them when
+  PhoneAPI asks again; anything not ticked is a `403`;
 - switches the local API on if it was off, and hands PhoneAPI the key, a proof key
   and the port as the activity result, never a file, broadcast or the clipboard.
 
