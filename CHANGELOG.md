@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Entries for 1.0 through 1.3 were reconstructed from the git history and the
 release diffs; the file did not exist while those versions shipped.
 
+## [1.7.1] — 2026-10-27
+
+### Changed
+
+- **Asking again starts where the key is.** When PhoneAPI already holds a key
+  and asks for a new one, *see* and *change* start ticked the way the held key
+  has them, instead of off. A first request still starts with both off.
+
 ## [1.7] — 2026-10-27
 
 ### Added
@@ -280,6 +288,7 @@ Initial release.
 iterations that were never tagged individually, so there are no comparison links
 for them.
 
+[1.7.1]: https://github.com/PortableDiag/Permafrost/compare/v1.7...v1.7.1
 [1.7]: https://github.com/PortableDiag/Permafrost/compare/v1.6.1...v1.7
 [1.6.1]: https://github.com/PortableDiag/Permafrost/compare/v1.6...v1.6.1
 [1.6]: https://github.com/PortableDiag/Permafrost/compare/v1.5...v1.6

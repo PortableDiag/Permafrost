@@ -42,16 +42,23 @@ public class PhoneApiGrantActivity extends LockedActivity {
 
         StringBuilder body = new StringBuilder(getString(R.string.phoneapi_body));
         if (!ApiPrefs.enabled(this)) body.append(' ').append(getString(R.string.phoneapi_turns_on));
-        if (PhoneApiAccess.grant(this) != null) body.append(' ').append(getString(R.string.phoneapi_replaces));
+        PhoneApi.Grant held = PhoneApiAccess.grant(this);
+        if (held != null) body.append(' ').append(getString(R.string.phoneapi_replaces));
         ((TextView) findViewById(R.id.body)).setText(body);
 
         CheckBox see = findViewById(R.id.see);
         CheckBox change = findViewById(R.id.change);
         MaterialButton allow = findViewById(R.id.allow);
-        // Everything starts off, and a key that may do nothing isn't worth minting.
+        // A new key starts off; asking again starts at what the held key may do.
+        // A key that may do nothing isn't worth minting.
+        if (held != null) {
+            see.setChecked(held.see);
+            change.setChecked(held.change);
+        }
         Runnable sync = () -> allow.setEnabled(see.isChecked() || change.isChecked());
         see.setOnCheckedChangeListener((b, on) -> sync.run());
         change.setOnCheckedChangeListener((b, on) -> sync.run());
+        sync.run();
 
         findViewById(R.id.deny).setOnClickListener(v -> {
             Log.i(TAG, "phoneapi: key request declined");
