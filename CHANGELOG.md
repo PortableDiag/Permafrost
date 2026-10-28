@@ -39,6 +39,11 @@ proof on a `401` matched an independent HMAC. Uninstalling PhoneAPI dropped the
 key, and a second handshake with both boxes, then a revoke from Settings, did
 what they say.
 
+The rooted freeze/thaw cycle was then run on 1.7 on the Android 15 handset,
+through the API: add → frozen, wake, freeze, launch (the app came to the front)
+→ re-frozen within 6 s of leaving it, unlock for update, re-lock, remove. The
+device's disabled packages matched the before-snapshot exactly afterwards.
+
 ## [1.6.1] — 2026-10-27
 
 ### Fixed
